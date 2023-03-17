@@ -7,136 +7,135 @@ public class MelodyQueue {
 //Add all of your methods to this class. DO NOT CHANGE ANY OTHER CLASSES!!!!
 	
 	public MelodyQueue() {
-		front = null;
+		front = null;							// initializes front and back to null
 		back =  front;
 	}
 	
 	public void enqueue(Object item) {
-		if(isEmpty()) {								// checks to see if queue is empty
+		if(isEmpty()) {							// checks to see if queue is empty
 			front = new Node(item);
 			back = front;
 		}
 		else {
 			back = front;
-			while(back.getNext() != null)			// traverses the queue with node 'back'
+			while(back.getNext() != null)		// traverses the queue with node 'back'
 				back = back.getNext();
-			back.setNext(new Node(item));			// points the last node in the queue to the new node
-			back = back.getNext();					// points 'back' to the new node
+			back.setNext(new Node(item));		// points the last node in the queue to the new node
+			back = back.getNext();				// points 'back' to the new node
 		}
 	}
 	
 	public Object dequeue() {
-		if(isEmpty()) 								// checks to see if queue is empty
+		if(isEmpty()) 							// checks to see if queue is empty
 			System.out.println("Queue is empty");
 		else {
-			Node temp = front;						// retrieves the node at the front
-			front = temp.getNext();					// point 'front' to the next node
-			return temp;							// returns the node that was removed
+			Node temp = front;					// retrieves the node at the front
+			front = temp.getNext();				// points 'front' to the next node
+			return temp;						// returns the node that was removed
 		}
-		return null;								// returns null if queue if empty
+		return null;							// returns null if queue if empty
 	}
 	
 	public Boolean isEmpty() {
-		return (front == null);						// returns true or false
+		return (front == null);					// returns true or false
 	}
 	
 	public double duration() {
-		double songDuration = 0;
-		for(Node curr = front; curr != null; curr = curr.getNext())
-			songDuration += ((Note)curr.getItem()).getDuration();
-		return songDuration + timeRepeat();
+		double songDur = 0;
+		for(Node curr = front; curr != null; curr = curr.getNext()) // traversal 
+			songDur += ((Note)curr.getItem()).getDuration();		// adds the duration of each note
+		return songDur + timeRepeat();				// returns the duration of the song along with any repeated sections
 	}
 	
 	public double timeRepeat() {
-		double repeatDuration = 0;
-		Node curr = front;
-		Note note = (Note)curr.getItem();
+		double repDur = 0;
+		Note note;
 		
-		while(curr.getNext() != null) {
-			if(note.isRepeat()) {
+		Node curr = front;
+		while(curr != null) {										
+			note = (Note)curr.getItem();
+			if(note.isRepeat()) {									// searches for the beginning of a repeated section(if there's one)
 				do {
-					repeatDuration += ((Note)curr.getItem()).getDuration();
+					repDur += ((Note)curr.getItem()).getDuration();	// adds the duration of each note in the repeated section
 					curr = curr.getNext();
 					note = (Note)curr.getItem();
-				}while(!note.isRepeat());
-				repeatDuration += ((Note)curr.getItem()).getDuration();
+				}while(!note.isRepeat());							// terminates do-while loop when the last note of the section is found
+				repDur += ((Note)curr.getItem()).getDuration();		// adds the duration of the last note in the section
 			}	
 			curr = curr.getNext();
-			note = (Note)curr.getItem();
 		}	
-		return repeatDuration;
+		return repDur;												// returns the duration
 	}
 	
 	public int size() {
 		int length = 0;
 		for(Node curr = front; curr != null; curr = curr.getNext())
-			length++;
-		return length;
+			length++;												// increments length after passing each node
+		return length;												// returns the length
 	}
 	
 	public String makeString() {
-		String songNotes = "";
-		for(Node curr = front; curr != null; curr = curr.getNext()) 
-			songNotes += (((Note)curr.getItem()).toString() + "\n");
-		return songNotes;
+		String songInfo = "";
+		for(Node curr = front; curr != null; curr = curr.getNext())
+			songInfo += (((Note)curr.getItem()).toString() + "\n");	// concatenates the info of each Node to 'songInfo'
+		return songInfo;											// returns the song info as a string
 	}
 	
 	public void tempoChange(double tempo) {
-		double newDuration = 0;
+		double newDur = 0;
 		for(Node curr = front; curr != null; curr = curr.getNext()) {
-			newDuration = ((Note)curr.getItem()).getDuration() * tempo;
-			((Note)curr.getItem()).setDuration(newDuration);
+			newDur = ((Note)curr.getItem()).getDuration() * tempo;	// gets a new duration
+			((Note)curr.getItem()).setDuration(newDur);				// sets the new duration
 		}
 	}
 	
 	public void playRepeat() {
+		Note note;
 		for(Node curr = front; curr != null; curr = curr.getNext()) {
-			Note note = ((Note)curr.getItem());
-			note.play();
+			note = ((Note)curr.getItem());							// gets each note in the song
+			note.play();											// play each note
 		}
 	}
 	
 	public void appendMelody(MelodyQueue other) {
-		this.back.setNext(other.front);
-		this.back = other.back;
+		this.back.setNext(other.front);		// points the last node of one song to the first node of the second song
+		this.back = other.back;				// points 'back' to the last node of the second song
 	}
 	
 	public MelodyQueue reverseMelody() {
 		NoteStack stack = new NoteStack();
-		for(Node curr = front; curr != null; curr = curr.getNext())
-			stack.push(curr.getItem());
+		for(Node curr = front; curr != null; curr = curr.getNext())	// traverses queue
+			stack.push(curr.getItem());								// adds each node from queue to a stack
 		
 		MelodyQueue reverse = new MelodyQueue();
-		for(Node curr = front; curr != null; curr = curr.getNext())
-			reverse.enqueue(stack.pop());
-		return reverse;
+		for(Node curr = front; curr != null; curr = curr.getNext())	// traverses stack
+			reverse.enqueue(stack.pop());							// pops each node from the stack and adds it to a new queue
+		return reverse;												// returns new reversed queue
 	}
 	
 	public void play() {
-		Node curr = front;
-		boolean isRepeated;
-		MelodyQueue temp = new MelodyQueue();
+		MelodyQueue repeat = new MelodyQueue();
+		Note note;
+		
+		Node curr = front;	
 		while(curr != null) {
-			Note note = ((Note)curr.getItem());
-			isRepeated = note.isRepeat();
-			if(isRepeated) {
+			note = ((Note)curr.getItem());								
+			if(note.isRepeat()) {									// searches for the beginning of a repeated section(if there's one)
 				do {
-					temp.enqueue(note);
-					note.play();
+					repeat.enqueue(note);							// adds each note of the repeated section to a new queue
+					note.play();									// plays each note
 					curr = curr.getNext();
 					note = ((Note)curr.getItem());
-					isRepeated = note.isRepeat();
-				}while(!isRepeated);
+				}while(!note.isRepeat());							// terminates do-while loop when the last note of the section is found
 				
-				temp.enqueue(note);
+				repeat.enqueue(note);								// adds last note of the section to queue
 				note.play();
-				temp.playRepeat();
+				repeat.playRepeat();								// plays repeated section
 				curr = curr.getNext();
+				note = ((Note)curr.getItem());
 			}
-			else {
-				note.play();
-				curr = curr.getNext();
-			}
+			note.play();
+			curr = curr.getNext();
 		}
 	}
 	

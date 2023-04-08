@@ -1,2 +1,2 @@
 # MelodyQueue
-Simple mp3 player using queues
+Mp3 player using queues
